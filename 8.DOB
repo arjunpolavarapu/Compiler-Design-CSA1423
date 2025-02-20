@@ -1,0 +1,53 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to check if a year is a leap year
+int isLeapYear(int year) {
+    return (year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0));
+}
+
+// Function to validate the date
+int isValidDate(int day, int month, int year) {
+    // Days in each month
+    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    // Leap year adjustment for February
+    if (month == 2 && isLeapYear(year)) {
+        daysInMonth[1] = 29;
+    }
+
+    // Validate year, month, and day
+    if (year < 1000 || year > 2999) return 0;
+    if (month < 1 || month > 12) return 0;
+    if (day < 1 || day > daysInMonth[month - 1]) return 0;
+
+    return 1;
+}
+%}
+
+%%
+
+([0-9]{2})\/([0-9]{2})\/([1-2][0-9]{3}) {
+    int day = atoi(yytext);             // Extract day
+    int month = atoi(yytext + 3);       // Extract month
+    int year = atoi(yytext + 6);        // Extract year
+
+    if (isValidDate(day, month, year)) {
+        printf("%s is a valid date.\n", yytext);
+    } else {
+        printf("%s is an invalid date.\n", yytext);
+    }
+}
+
+.+ { printf("%s is an invalid date.\n", yytext); }
+
+%%
+
+int yywrap() { return 1; }
+
+int main() {
+    printf("Enter the Date of Birth (dd/mm/yyyy): ");
+    yylex();
+    return 0;
+}
